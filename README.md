@@ -20,6 +20,14 @@
 }
 ```        
 
+> app.js:
+
+```js
+const { Client }       = require('ezrpc')
+let app = new Client('localhost', 9999).methods
+app.ping().then( console.dir )          // gets called on one of the local/remote workers
+```
+
 ## run distributed app
 
 ```bash
