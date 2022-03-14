@@ -1,14 +1,39 @@
 # horizontal scaleable nodejs boilerplate
 
-> `app.json`:
+```bash
+$ node server.js
+starting worker on port 5000
+starting worker on port 5001
+starting worker on port 5002
+'[process 368] ping!'          # executed on a local/remote cpu 
+'[process 369] ping!'          #
+'[process 375] ping!'          #
+```
+
+> app.js:
+
+```js
+require('./server/loadbalancer')
+const { Client }       = require('ezrpc')
+
+let app = new Client('localhost', 9999).methods
+setInterval( () => {
+
+  app.ping().then( console.dir )          // gets called on one of the local/remote workers
+  app.getSharedData().then( console.dir ) // see server.module.exports above 
+
+}, 1000)
+```
+
+> `cluster.json`:
 
 ```json
 {
-  "master":  "./cluster.js", 
+  "master":  "./app.js", 
   "workers": {
-    "worker1":{ "worker":"./worker.js", "count":1, "port":5000 }, 
-    "worker2":{ "worker":"./worker.js", "count":1, "port":5001 },
-    "worker3":{ "worker":"./worker.js", "count":1, "port":5002 } 
+    "worker1":{ "worker":"./server/pkg/mypkg.js", "count":1, "port":5000 }, 
+    "worker2":{ "worker":"./server/pkg/mypkg.js", "count":1, "port":5001 },
+    "worker3":{ "worker":"./server/pkg/mypkg.js", "count":1, "port":5002 } 
   }, 
   "remotes":[
     { "host":"192.23.4.56", "port":6000 },       // same app but runs on other server
@@ -16,28 +41,9 @@
     { "host":"192.23.4.58", "port":6002 },       //
   ], 
   "accessKey": "test",                       // rest api-key
-  "cli":false                                // manage workers using REST or cli 
+  "cli":true                                 // manage workers using REST or cli 
 }
 ```        
-
-> app.js:
-
-```js
-const { Client }       = require('ezrpc')
-let app = new Client('localhost', 9999).methods
-app.ping().then( console.dir )          // gets called on one of the local/remote workers
-```
-
-## run distributed app
-
-```bash
-$ node cluster.js
-starting worker on port 5000
-starting worker on port 5001
-starting worker on port 5002
-'[process 368] ping!'
-'[process 369] ping!'
-'[process 375] ping!'
 
 ## manage/update workers using REST or cli
 
