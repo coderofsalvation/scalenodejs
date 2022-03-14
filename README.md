@@ -5,7 +5,7 @@
 ```json
 {
   "master":  "./cluster.js", 
-	"workers": {
+  "workers": {
     "worker1":{ "worker":"./worker.js", "count":1, "port":5000 }, 
     "worker2":{ "worker":"./worker.js", "count":1, "port":5001 },
     "worker3":{ "worker":"./worker.js", "count":1, "port":5002 } 
