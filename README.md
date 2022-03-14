@@ -11,9 +11,9 @@
     "worker3":{ "worker":"./worker.js", "count":1, "port":5002 } 
   }, 
   "remotes":[
-    { "host":"192.23.4.56", port:6000 },       // same app but runs on other server
-    { "host":"192.23.4.56", port:6001 },       // they become workers of this server
-    { "host":"192.23.4.58", port:6002 },       //
+    { "host":"192.23.4.56", "port":6000 },       // same app but runs on other server
+    { "host":"192.23.4.56", "port":6001 },       // they become workers of this server
+    { "host":"192.23.4.58", "port":6002 },       //
   ], 
   "accessKey": "test",                       // rest api-key
   "cli":false                                // manage workers using REST or cli 
