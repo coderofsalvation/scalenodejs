@@ -55,7 +55,7 @@ setTimeout( start, 1) // dont block
 
 thanks to [npmjs.org/ezrpc](https://npmjs.org/ezrpc)
 
-> when using remotes, use env-var `upstream=main.myserver.org` e.g., to redirect `app.ping()` calls to the main loadbalancer.
+> when using remotes, use env-var `upstream=main.myserver.org` e.g. on remotes. By doing so, `app.ping()` will run through loadbalancer `main.myserver.org`.
 
 ## centralized data
 
