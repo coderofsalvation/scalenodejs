@@ -10,7 +10,7 @@ starting worker on port 5002
 '[process 375] ping!'          #
 ```
 
-> server/service/foo.js:
+> `server/service/foo.js`:
 
 ```js
 const { Server, Client } = require('ezrpc')
