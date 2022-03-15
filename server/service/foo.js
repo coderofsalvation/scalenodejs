@@ -7,7 +7,7 @@ service.module.exports = {
   }
 }
 
-let main = async () => {
+let start = async () => {
   const app = new Client( process.env.upstream || 'localhost', 9999).methods
   await app.ping()                 // following gets called on one of the local/remote workers 
   await app.set("foo.bar",[{x:1}]) // this gets called (centrally) at server/loadbalancer.js	
@@ -15,5 +15,5 @@ let main = async () => {
   console.log( await app.findOne("foo.bar",{x:{$lt:2}}) )
 }
 
-setTimeout( main, 1) // dont block
+setTimeout( start, 1) // dont block
 
