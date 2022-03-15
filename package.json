@@ -10,7 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "cluster-service": "^2.1.4",
-    "ezrpc": "^1.5.1"
+    "ezrpc": "^1.5.1",
+    "sift": "^16.0.0"
   },
   "devDependencies": {
     "pkg": "^5.5.2"

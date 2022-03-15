@@ -1,4 +1,5 @@
 const cluster          = require('./../cluster.json')
+const db               = require('./db')({file:'db.json', ratelimit:1500})
 const { LoadBalancer } = require('ezrpc')
 
 let port = 5000
@@ -13,5 +14,8 @@ for ( let i in cluster.workers ) {
 const server = new LoadBalancer(workers, 9999)
 
 server.module.exports = {
-  getSharedData: () => [1, 2, 3]
+  get: (k,fallback) => db.getpath(db,k,fallback),
+  set: (k,v) => db.setpath(db,k,v),
+  find: (k,q) => db.find(k,q),
+  findOne: (k,q) => db.findOne(k,q),
 }

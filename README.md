@@ -14,15 +14,15 @@ starting worker on port 5002
 
 ```js
 require('./server/loadbalancer')
-const { Client }       = require('ezrpc')
+const { Client }  = require('ezrpc')
+const app         = new Client('localhost', 9999).methods
 
-let app = new Client('localhost', 9999).methods
-setInterval( () => {
+let main = async () => {
+  await app.ping()                // distribute call: on one of the local/remote cpu-workers
+  await app.set("foo.bar",{x:1})  // central call: server/loadbalancer.js 
+}
 
-  app.ping().then( console.dir )          // gets called on one of the local/remote workers
-  app.getSharedData().then( console.dir ) // see server/loadbalancer.js 
-
-}, 1000)
+main()
 ```
 
 > `cluster.json`:
@@ -52,3 +52,27 @@ thanks to godaddy's [npmjs.org/cluster-service](https://npmjs.org/cluster-servic
 ## scale horizontally by loadbalancing rpc calls
 
 thanks to [npmjs.org/ezrpc](https://npmjs.org/ezrpc)
+
+## centralized data
+
+all workers can save data centrally on `server/loadbalancer.js`:
+
+```javascript
+await app.set("foo.bar",[{x:1}])         // generates db.json
+await app.get("foo.bar") )               // [{x:1}]
+await app.find("foo.bar",   {x:{$lt:2}}) // [{x:1}]
+await app.findOne("foo.bar",{x:{$lt:2}}) // {x:1}
+```
+
+> `db.json` now contains `{foo:{bar:[{x:1}]}}`, which you can easily backup/edit
+
+## decentralized data (proxy-to-jsonfile)
+
+workers can easily use own databases:
+
+```
+const db = require('./server/db')({file:'mydb.json', ratelimit:1500})
+db.accounts = {a:[{foo:1},{foo:2}]}
+let some = db.find('accounts.a',{foo:{$lt:2}}) )
+let one  = db.findOne('accounts.a',{foo:{$lt:2}}) )
+```
