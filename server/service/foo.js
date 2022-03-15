@@ -7,7 +7,7 @@ let appget = () => service.app ? service.app
 service.module.exports = {
   async ping () {
     let app = appget()
-    console.log('[process '+process.pid+'] ping!')
+    console.log('[foo|'+process.pid+'] ping!')
     await app.log('centralized log', 'foo')
   }
 }
@@ -22,3 +22,4 @@ let start = async () => {
 
 setTimeout( start, 100) // dont block
 
+console.log('[foo|'+process.pid+'] started on port '+process.env.port)

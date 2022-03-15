@@ -8,6 +8,11 @@ starting worker on port 5002
 [process 23680] ping!           # printed on local or remote cpu/server 
  ├☑ foo:  centralized log       # printed on main server
 
+[foo|24479] started on port 5001
+[foo|24478] started on port 5000
+[foo|24485] started on port 5002
+[foo|24478] ping!               # local or remote server/cpu
+ ├☑ foo:  centralized log       # local only
 ```
 
 > `server/service/foo.js`:
