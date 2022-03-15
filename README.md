@@ -10,26 +10,32 @@ starting worker on port 5002
 '[process 375] ping!'          #
 ```
 
-> app.js:
+> server/service/foo.js:
 
 ```js
-require('./server/loadbalancer')
-const { Client }  = require('ezrpc')
-const app         = new Client('localhost', 9999).methods
+const { Server, Client } = require('ezrpc')
+const service            = new Server( parseInt(process.env.port) )
 
-let main = async () => {
-  await app.ping()                // distribute call: on one of the local/remote cpu-workers
-  await app.set("foo.bar",{x:1})  // central call: server/loadbalancer.js 
+service.module.exports = {
+  ping () {
+    console.log('[process '+process.pid+'] ping!')
+  }
 }
 
-main()
+let start = async () => {
+  const app = new Client( process.env.upstream || 'localhost', 9999).methods
+  await app.ping()                 // following gets called on one of the local/remote workers 
+  await app.set("foo.bar",[{x:1}]) // this gets called (centrally) at server/loadbalancer.js	
+}
+
+setTimeout( start, 1) // dont block
 ```
 
 > `cluster.json`:
 
 ```json
 {
-  "master":  "./app.js", 
+  "master":  "./server/loadbalancer.js", 
   "workers": {
     "worker1":{ "worker":"./server/pkg/mypkg.js", "count":1, "port":5000 }, 
     "worker2":{ "worker":"./server/pkg/mypkg.js", "count":1, "port":5001 },
@@ -45,13 +51,11 @@ main()
 }
 ```        
 
-## manage/update workers using REST or cli
-
-thanks to godaddy's [npmjs.org/cluster-service](https://npmjs.org/cluster-service) see [video here](http://x.co/bpnodevid)
-
 ## scale horizontally by loadbalancing rpc calls
 
 thanks to [npmjs.org/ezrpc](https://npmjs.org/ezrpc)
+
+> when using remotes, use env-var `upstream=main.myserver.org` e.g., to redirect `app.ping()` calls to the main loadbalancer.
 
 ## centralized data
 
