@@ -5,9 +5,9 @@ $ node server.js
 starting worker on port 5000
 starting worker on port 5001
 starting worker on port 5002
-'[process 368] ping!'          # executed on a local/remote cpu 
-'[process 369] ping!'          #
-'[process 375] ping!'          #
+[process 23680] ping!           # printed on local or remote cpu/server 
+ ├☑ foo:  centralized log       # printed on main server
+
 ```
 
 > `server/service/foo.js`:
@@ -16,9 +16,14 @@ starting worker on port 5002
 const { Server, Client } = require('ezrpc')
 const service            = new Server( parseInt(process.env.port) )
 
+let appget = () => service.app ? service.app 
+                               : service.app = new Client( process.env.upstream || 'localhost', 9999).methods
+
 service.module.exports = {
-  ping () {
+  async ping () {
+    let app = appget()
     console.log('[process '+process.pid+'] ping!')
+    await app.log('centralized log', 'foo')
   }
 }
 

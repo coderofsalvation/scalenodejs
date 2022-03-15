@@ -18,4 +18,5 @@ server.module.exports = {
   set: (k,v) => db.setpath(db,k,v),
   find: (k,q) => db.find(k,q),
   findOne: (k,q) => db.findOne(k,q),
+  log: (msg,id) => console.log(" ├☑ "+(id?id+': ':'')+' '+msg)
 }
