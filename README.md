@@ -85,6 +85,20 @@ let some = db.find('accounts.a',{foo:{$lt:2}}) )
 let one  = db.findOne('accounts.a',{foo:{$lt:2}}) )
 ```
 
+## Lightweight 55MB all-in-one-binary / docker-image
+
+```javascript
+$ podman build -t elastinode
+$ podman images
+REPOSITORY                   TAG             IMAGE ID       CREATED              SIZE
+elasticnode                  latest          79988bafb26d   32 seconds ago       51.5MB
+$ DOCKER_BUILDKIT=1 docker build -t elasticnode --output out
+$ ls -la out/server
+-rwxr-xr-x 1 44M mrt 16 16:10 out/server
+```
+
+> not bad for a distributed scalable app no?
+
 ## test
 
 ```javascript
