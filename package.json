@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "cluster-service": "^2.1.4",
-    "ezrpc": "^1.5.1",
+    "ezrpc": "github:coderofsalvation/ezrpc",
     "sift": "^16.0.0"
   },
   "devDependencies": {

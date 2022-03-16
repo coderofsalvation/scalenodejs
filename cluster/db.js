@@ -26,7 +26,7 @@ class ProxyHandler {
     opts.ratelimit = opts.ratelimit || 1500
     this.opts     = opts;
     this.saveLast = null
-    this.target   = {}
+    this.target   = opts.data
     this.save = () => {
       clearTimeout(this.saveLast)
       setTimeout( () => fs.writeFileSync(this.opts.file, JSON.stringify(this.target,null,2),"utf-8"), this.opts.ratelimit)
@@ -83,5 +83,6 @@ class ProxyHandler {
 }
 
 module.exports = function jsonObject(options) {
-  return new Proxy(readFile(options.file), new ProxyHandler(options));
+  let data = readFile(options.file)
+  return new Proxy(data, new ProxyHandler({...options,data}));
 };

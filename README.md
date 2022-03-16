@@ -2,74 +2,68 @@
 
 ```bash
 $ node server.js
-starting worker on port 5000
-starting worker on port 5001
-starting worker on port 5002
-[process 23680] ping!           # printed on local or remote cpu/server 
- ├☑ foo:  centralized log       # printed on main server
-
-[foo|24479] started on port 5001
-[foo|24478] started on port 5000
-[foo|24485] started on port 5002
-[foo|24478] ping!               # local or remote server/cpu
- ├☑ foo:  centralized log       # local only
+[loadbal|300457|tcp/9999] loadbalancer started
+[service|300469|tcp/5000] cluster-node started on port 5000
+[service|300471|tcp/5001] cluster-node started on port 5001
+[service|300469|tcp/5000] cluster-node connected
+[service|300471|tcp/5001] cluster-node connected
+[loadbal|300457|tcp/9999] initing cluster-app
+connected 
+[03-16T14:40:27] ├☑ cluster:  ping!                 # called on cluster 
 ```
 
-> `server/service/foo.js`:
-
-```js
-const { Server, Client } = require('ezrpc')
-const service            = new Server( parseInt(process.env.port) )
-
-let appget = () => service.app ? service.app 
-                               : service.app = new Client( process.env.upstream || 'localhost', 9999).methods
-
-service.module.exports = {
-  async ping () {
-    let app = appget()
-    console.log('[process '+process.pid+'] ping!')
-    await app.log('centralized log', 'foo')
-  }
-}
-
-let start = async () => {
-  const app = new Client( process.env.upstream || 'localhost', 9999).methods
-  await app.ping()                 // following gets called on one of the local/remote workers 
-  await app.set("foo.bar",[{x:1}]) // this gets called (centrally) at server/loadbalancer.js	
-}
-
-setTimeout( start, 1) // dont block
-```
-
-> `cluster.json`:
+## cluster definition 
 
 ```json
 {
-  "master":  "./server/loadbalancer.js", 
-  "workers": {
-    "worker1":{ "worker":"./server/pkg/mypkg.js", "count":1, "port":5000 }, 
-    "worker2":{ "worker":"./server/pkg/mypkg.js", "count":1, "port":5001 },
-    "worker3":{ "worker":"./server/pkg/mypkg.js", "count":1, "port":5002 } 
+  "master":  "./cluster/loadbalancer.js", 
+  "workers": {                                   // cpus
+    "serviceA":{ "worker":"./service/index.js", "count":1, "port":5000 },
+    "serviceB":{ "worker":"./service/index.js", "count":1, "port":5001 }
   }, 
   "remotes":[
-    { "host":"192.23.4.56", "port":6000 },       // same app but runs on other server
-    { "host":"192.23.4.56", "port":6001 },       // they become workers of this server
-    { "host":"192.23.4.58", "port":6002 },       //
+    { "host":"192.23.4.56", "port":5000 },       // same app but runs on other server
+    { "host":"192.23.4.56", "port":5001 },       // they become workers of this server
   ], 
-  "accessKey": "test",                       // rest api-key
-  "cli":true                                 // manage workers using REST or cli 
+  "remotes":[], 
+  "accessKey": "test",                           // cluster management over rest/cli
+  "cli":false                                    // thanks to npmjs.org/cluster-service
 }
-```        
+```
 
-## scale horizontally by loadbalancing rpc calls
 
-thanks to [npmjs.org/ezrpc](https://npmjs.org/ezrpc)
+> cluster functions:
+
+```js
+const { Server, Client } = require('ezrpc')
+const service = new Server( parseInt(process.env.port) )
+
+service.module.exports = {
+  async ping () {
+    let app = service.client.methods
+    app.log('ping!', 'cluster')
+    return 123
+  }
+}
+
+service.server.on('connection', () => {
+  service.client = new Client( process.env.upstream || 'localhost', 9999,{maxReconnectAttempts:-1})
+  service.client.socket.on('connect', () => log('cluster-node connected') )
+  log('cluster-node started on port '+process.env.port)
+})
+```
+
+## scale horizontally 
+
+* across cpu's thanks to [npmjs.org/cluster-service](https://npmjs.org/cluster-service)
+* across servers thanks to [npmjs.org/ezrpc](https://npmjs.org/ezrpc)
+* update/manage workers using REST/cli thanks to [npmjs.org/cluster-service](https://npmjs.org/cluster-service)
 
 > when using remotes, use env-var `upstream=main.myserver.org` e.g. on remotes. By doing so, `app.ping()` will run through loadbalancer `main.myserver.org`.
 
 ## centralized data
 
-all workers can save data centrally on `server/loadbalancer.js`:
+all workers can save data centrally on `cluster/loadbalancer.js`:
 
 ```javascript
 await app.set("foo.bar",[{x:1}])         // generates db.json
@@ -90,3 +84,20 @@ db.accounts = {a:[{foo:1},{foo:2}]}
 let some = db.find('accounts.a',{foo:{$lt:2}}) )
 let one  = db.findOne('accounts.a',{foo:{$lt:2}}) )
 ```
+
+## test
+
+```javascript
+$ node test/test.js
+[loadbal|301490|tcp/9999] loadbalancer started
+[service|301502|tcp/5000] cluster-node started on port 5000
+[service|301502|tcp/5000] cluster-node connected
+[service|301503|tcp/5001] cluster-node started on port 5001
+[loadbal|301490|tcp/9999] initing cluster-app
+[service|301503|tcp/5001] cluster-node connected
+[ { id: 'projectA',  data: {} },  { id: 'projectB',  data: {} } ]
+connected 
+[03-16T14:50:15] ├☑ cluster:  ping!
+OK : app.ping => 123
+done
+
