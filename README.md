@@ -8,8 +8,8 @@ $ node server.js
 [service|300469|tcp/5000] cluster-node connected
 [service|300471|tcp/5001] cluster-node connected
 [loadbal|300457|tcp/9999] initing cluster-app
+[03-16T14:40:27] ├☑ myservice:  connected!          # executed on cluster 
 [03-16T14:40:27] ├☑ myservice:  ping!               # executed on cluster 
-[03-16T14:40:27] ├☑ cluster:  ping!                 # executed on cluster 
 ```
 
 ## cluster definition 
@@ -40,7 +40,7 @@ const service = require('./../cluster/service').service('myservice')
 service.module.exports = {
   async ping () {
     let app = service.client.methods
-    app.log('ping!', 'cluster')
+    app.log('ping!', 'myservice')
     //log('local ping!')
     return 123
   }
@@ -111,7 +111,7 @@ $ node test/test.js
 [ { id: 'projectA',  data: {} },  { id: 'projectB',  data: {} } ]
 connected 
 [03-16T14:50:15] ├☑ myservice:  connected!
-[03-16T14:50:15] ├☑ cluster:  ping!
+[03-16T14:50:15] ├☑ myservice:  ping!
 OK : app.ping => 123
 done
 
