@@ -84,7 +84,7 @@ let some = db.find('accounts.a',{foo:{$lt:2}}) )
 let one  = db.findOne('accounts.a',{foo:{$lt:2}}) )
 ```
 
-## Lightweight 55MB all-in-one-binary / docker-image
+## Lightweight 55MB all-in-one-V8-binary / docker-image
 
 ```javascript
 $ podman build -t elastinode
