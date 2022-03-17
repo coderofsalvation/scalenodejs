@@ -54,9 +54,9 @@ service.init = async (app) => {
 
 ## scale horizontally 
 
-* across cpu's thanks to [npmjs.org/cluster-service](https://npmjs.org/cluster-service)
-* across servers thanks to [npmjs.org/ezrpc](https://npmjs.org/ezrpc)
-* update/manage workers using REST/cli thanks to [npmjs.org/cluster-service](https://npmjs.org/cluster-service)
+* across cpu's thanks to [cluster-service](https://npmjs.org/cluster-service)
+* across servers thanks to [ezrpc](https://npmjs.org/ezrpc)
+* update/manage workers using REST/cli thanks to [cluster-service](https://npmjs.org/cluster-service)
 
 > when using remotes, use env-var `upstream=main.myserver.org` e.g. on remotes. By doing so, `app.ping()` will run through loadbalancer `main.myserver.org`.
 
