@@ -1,6 +1,4 @@
-const { Server, Client } = require('ezrpc')
-const service = new Server( parseInt(process.env.port) )
-let log       = (msg) => console.log('[service|'+process.pid+'|tcp/'+process.env.port+'] '+msg)
+const service = require('./../cluster/service').service('myservice')
 
 service.module.exports = {
   async ping () {
@@ -11,9 +9,7 @@ service.module.exports = {
   }
 }
 
-service.server.on('connection', () => {
-  service.client = new Client( process.env.upstream || 'localhost', 9999,{maxReconnectAttempts:-1})
-  service.client.socket.on('connect', () => log('cluster-node connected') )
-  log('cluster-node started on port '+process.env.port)
-})
-
+service.init = async (app) => {
+  await app.log("connected!",'myservice')
+  await app.ping()
+}

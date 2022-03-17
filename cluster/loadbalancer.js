@@ -26,6 +26,8 @@ service.module.exports = {
   set: async (k,v) => db.setpath(db,k,v),
   find: async (k,q) => db.find(k,q),
   findOne: async (k,q) => db.findOne(k,q),
+  update: async (q,v) => db.update(q,v),
+  updateOne: async (q,v) => db.updateOne(q,v),
   log: async (msg,id) => console.log("["+String( new Date().toISOString() ).substr(5,14)+"] ├☑ "+(id?id+': ':'')+' '+msg)
 }
 

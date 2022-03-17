@@ -8,8 +8,8 @@ $ node server.js
 [service|300469|tcp/5000] cluster-node connected
 [service|300471|tcp/5001] cluster-node connected
 [loadbal|300457|tcp/9999] initing cluster-app
-connected 
-[03-16T14:40:27] ├☑ cluster:  ping!                 # called on cluster 
+[03-16T14:40:27] ├☑ myservice:  ping!               # executed on cluster 
+[03-16T14:40:27] ├☑ cluster:  ping!                 # executed on cluster 
 ```
 
 ## cluster definition 
@@ -35,22 +35,21 @@ connected
 > cluster functions:
 
 ```js
-const { Server, Client } = require('ezrpc')
-const service = new Server( parseInt(process.env.port) )
+const service = require('./../cluster/service').service('myservice')
 
 service.module.exports = {
   async ping () {
     let app = service.client.methods
     app.log('ping!', 'cluster')
+    //log('local ping!')
     return 123
   }
 }
 
-service.server.on('connection', () => {
-  service.client = new Client( process.env.upstream || 'localhost', 9999,{maxReconnectAttempts:-1})
-  service.client.socket.on('connect', () => log('cluster-node connected') )
-  log('cluster-node started on port '+process.env.port)
-})
+service.init = async (app) => {
+  await app.log("connected!",'myservice')
+  await app.ping()
+}
 ```
 
 ## scale horizontally 
@@ -61,9 +60,9 @@ service.server.on('connection', () => {
 
 > when using remotes, use env-var `upstream=main.myserver.org` e.g. on remotes. By doing so, `app.ping()` will run through loadbalancer `main.myserver.org`.
 
-## centralized data
+## centralized calls & data
 
-all workers can save data centrally on `cluster/loadbalancer.js`:
+all workers can execute / save data centrally on `cluster/loadbalancer.js`:
 
 ```javascript
 await app.set("foo.bar",[{x:1}])         // generates db.json
@@ -111,6 +110,7 @@ $ node test/test.js
 [service|301503|tcp/5001] cluster-node connected
 [ { id: 'projectA',  data: {} },  { id: 'projectB',  data: {} } ]
 connected 
+[03-16T14:50:15] ├☑ myservice:  connected!
 [03-16T14:50:15] ├☑ cluster:  ping!
 OK : app.ping => 123
 done
