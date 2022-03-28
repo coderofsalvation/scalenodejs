@@ -1,0 +1,12 @@
+{
+  "project":[
+    {
+      "id":"projectA", 
+      "data":{}
+    },  
+    {
+      "id":"projectB", 
+      "data":{}
+    } 
+  ]
+}

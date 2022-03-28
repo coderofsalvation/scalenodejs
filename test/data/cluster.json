@@ -1,0 +1,10 @@
+{
+  "master":  "./cluster/loadbalancer.js", 
+  "workers": {
+    "serviceA":{ "worker":"./service/index.js", "count":1, "port":5000 },
+    "serviceB":{ "worker":"./service/index.js", "count":1, "port":5001 }
+  }, 
+  "remotes":[], 
+  "accessKey": "test", 
+  "cli":false
+}
